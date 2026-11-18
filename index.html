@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>近视与远视的成因及矫正模拟</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+
+      :root {
+        --bg: #edf0f3;
+        --panel: #ffffff;
+        --panel-2: #f4f7f9;
+        --ink: #1a2530;
+        --muted: #5b6b7a;
+        --line: #d3dce3;
+        --accent: #0f766e;
+        --accent-ink: #ffffff;
+        --amber: #d97706;
+        --ray: #e07b1f;
+        --good: #178a4c;
+        --mid: #b97a0e;
+        --bad: #cf3527;
+        --vitreous: #f2f7f5;
+        --sclera-stroke: #33424f;
+        --lens-fill: rgba(140, 205, 225, 0.5);
+        --lens-stroke: #3d7f96;
+        --retina: #b3402a;
+        --iris: #4a3421;
+        --stage-bg: #fbfcfd;
+        --chip-bg: #eef3f5;
+        --shadow: 0 10px 30px rgba(23, 38, 54, 0.08);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c1218;
+          --panel: #141f29;
+          --panel-2: #182633;
+          --ink: #e5edf3;
+          --muted: #94a7b8;
+          --line: #27394a;
+          --accent: #2aa79b;
+          --accent-ink: #06231f;
+          --amber: #e8a13c;
+          --ray: #f0922e;
+          --good: #3cb371;
+          --mid: #e0a93e;
+          --bad: #f0685c;
+          --vitreous: #16222d;
+          --sclera-stroke: #8fa9bc;
+          --lens-fill: rgba(110, 180, 205, 0.35);
+          --lens-stroke: #7cc0d6;
+          --retina: #e0684e;
+          --iris: #a97c50;
+          --stage-bg: #101922;
+          --chip-bg: #1a2937;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 20px 16px 48px; }
+
+      header.page-head { margin: 4px 0 16px; }
+      header.page-head h1 {
+        font-family: "Noto Serif SC", "Noto Sans SC", serif;
+        font-weight: 900;
+        font-size: clamp(26px, 4.5vw, 38px);
+        margin: 0 0 6px;
+        letter-spacing: 0.02em;
+      }
+      header.page-head p { margin: 0; color: var(--muted); font-size: 15px; max-width: 46em; }
+      header.page-head p strong { color: var(--ink); }
+      .offline-btn {
+        margin-top: 12px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+        border-radius: 10px; padding: 8px 16px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+        min-height: 40px;
+      }
+      .offline-btn:hover { filter: brightness(1.08); }
+      .offline-note { color: var(--muted); font-size: 12.5px; margin-left: 10px; }
+
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr) 348px; gap: 16px; align-items: start; }
+      @media (max-width: 920px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+      }
+      .stage-card { padding: 10px 10px 4px; overflow: hidden; }
+      .stage-card svg { display: block; width: 100%; height: auto; }
+      .stage-note { color: var(--muted); font-size: 12.5px; padding: 2px 6px 8px; }
+
+      aside.panel { display: flex; flex-direction: column; gap: 16px; }
+      .sec { padding: 14px 16px 16px; }
+      .sec h2 {
+        font-size: 13px; font-weight: 700; color: var(--muted);
+        letter-spacing: 0.14em; margin: 0 0 10px;
+      }
+      .sec h2 .step {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 20px; height: 20px; border-radius: 50%;
+        background: var(--accent); color: var(--accent-ink);
+        font-size: 12px; letter-spacing: 0; margin-right: 7px; vertical-align: -4px;
+      }
+
+      .slider-row { display: flex; align-items: baseline; gap: 10px; }
+      .slider-row .val { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .slider-row .val small { font-weight: 500; color: var(--muted); font-size: 12px; }
+      input[type="range"] { width: 100%; accent-color: var(--accent); height: 36px; cursor: pointer; }
+      .scale-marks { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; margin-top: -4px; }
+
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .chip {
+        border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink);
+        border-radius: 999px; padding: 6px 13px; font-size: 13.5px; cursor: pointer;
+        font-family: inherit; min-height: 36px;
+      }
+      .chip:hover { border-color: var(--accent); }
+      .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+      .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+      .seg button {
+        flex: 1 1 auto; border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink);
+        border-radius: 10px; padding: 7px 10px; font-size: 14px; cursor: pointer; font-family: inherit;
+        min-height: 38px; white-space: nowrap;
+      }
+      .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+      .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .hint { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+
+      .toggle-btn {
+        width: 100%; border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink);
+        border-radius: 10px; padding: 8px 12px; font-size: 14.5px; cursor: pointer; font-family: inherit;
+        min-height: 40px; font-weight: 500;
+      }
+      .toggle-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+      .toggle-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .demo-btn { margin-top: 10px; }
+      .fit-btn { margin-top: 10px; }
+
+      .verdict { display: flex; align-items: center; gap: 12px; }
+      .verdict .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+      .verdict .big { font-size: 21px; font-weight: 900; }
+      .verdict .sub { color: var(--muted); font-size: 13px; }
+      .verdict.ok { color: var(--good); }
+      .verdict.mid { color: var(--mid); }
+      .verdict.bad { color: var(--bad); }
+      .verdict .txt { color: var(--ink); }
+      .verdict .txt .sub { display: block; }
+      .explain { margin: 10px 0 0; font-size: 14px; background: var(--panel-2); border-radius: 10px; padding: 10px 12px; }
+
+      dl.data { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; margin: 0; font-size: 14px; }
+      dl.data dt { color: var(--muted); white-space: nowrap; }
+      dl.data dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+      dl.data dd b { font-weight: 700; }
+
+      .effort { margin-top: 12px; }
+      .effort .lab { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+      .effort .bar { height: 9px; border-radius: 99px; background: var(--chip-bg); overflow: hidden; }
+      .effort .fill { height: 100%; width: 0%; background: var(--amber); border-radius: 99px; transition: width 0.12s linear; }
+
+      .formula {
+        font-family: "Noto Serif SC", serif; font-size: 17px; text-align: center;
+        background: var(--panel-2); border-radius: 10px; padding: 10px 8px; margin-top: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .frac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; margin: 0 2px; line-height: 1.15; }
+      .frac > span:first-child { border-bottom: 1.6px solid currentColor; padding: 0 5px; }
+      .frac > span:last-child { padding: 0 5px; }
+      .formula .unit { font-family: "Noto Sans SC", sans-serif; font-size: 12px; color: var(--muted); }
+
+      .retina-view { background: #0e151d; border-radius: 10px; padding: 8px; }
+      .retina-view svg { display: block; width: 100%; height: auto; }
+      .retina-cap { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; text-align: center; }
+
+      section.knowledge { margin-top: 22px; }
+      section.knowledge h2, section.water h2 {
+        font-family: "Noto Serif SC", serif; font-size: 22px; font-weight: 900; margin: 0 0 4px;
+      }
+      section.knowledge .lead, section.water .lead { color: var(--muted); margin: 0 0 14px; font-size: 14.5px; }
+      .kgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+      .kcard { padding: 16px 18px; }
+      .kcard h3 { margin: 0 0 8px; font-size: 16.5px; }
+      .kcard p { margin: 0 0 8px; font-size: 14px; }
+      .kcard p:last-child { margin-bottom: 0; }
+      .kcard .tag {
+        display: inline-block; font-size: 12px; font-weight: 700; border-radius: 6px;
+        padding: 1px 8px; margin-bottom: 8px; background: var(--chip-bg); color: var(--accent);
+      }
+      table.cmp { width: 100%; border-collapse: collapse; font-size: 14px; }
+      table.cmp th, table.cmp td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+      table.cmp thead th { color: var(--muted); font-weight: 500; font-size: 13px; border-bottom: 2px solid var(--line); }
+      table.cmp tbody th { font-weight: 700; white-space: nowrap; }
+      table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: none; }
+      a.ext { color: var(--accent); font-weight: 500; }
+      footer { margin-top: 26px; color: var(--muted); font-size: 12.5px; text-align: center; }
+
+      section.water { margin-top: 26px; }
+      .water-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+      @media (max-width: 920px) { .water-layout { grid-template-columns: minmax(0, 1fr); } }
+      .water-verdict { font-size: 15px; font-weight: 700; margin: 4px 0 0; }
+      .water-verdict.ok { color: var(--good); }
+      .water-verdict.bad { color: var(--bad); }
+
+      /* ---------- SVG scene ---------- */
+      .axis-line { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 7 6; opacity: 0.65; }
+      .sclera { fill: var(--vitreous); stroke: var(--sclera-stroke); stroke-width: 2.4; }
+      .iris { fill: var(--iris); }
+      .pupil { fill: #0b0f13; }
+      .lens-body { fill: var(--lens-fill); stroke: var(--lens-stroke); stroke-width: 2; }
+      .lens-core { fill: rgba(255, 255, 255, 0.35); }
+      .ciliary { fill: #c98a4b; stroke: #9c6527; stroke-width: 1.2; }
+      @media (prefers-color-scheme: dark) { .ciliary { fill: #a5713a; stroke: #d29a58; } }
+      .zonule { stroke: #9c6527; stroke-width: 1.9; fill: none; opacity: 0.95; }
+      @media (prefers-color-scheme: dark) { .zonule { stroke: #d29a58; } }
+      .retina-arc { stroke: var(--retina); stroke-width: 6; fill: none; stroke-linecap: round; }
+      .retina-arc.focused { filter: drop-shadow(0 0 6px rgba(230, 110, 60, 0.85)); }
+      .ray { stroke: var(--ray); stroke-width: 2.2; fill: none; opacity: 0.92; }
+      .ray-post { stroke: var(--ray); stroke-width: 2; fill: none; opacity: 0.45; }
+      .ray-dash { stroke: var(--ray); stroke-width: 2; fill: none; opacity: 0.55; stroke-dasharray: 6 5; }
+      .svg-label { font-size: 14.5px; fill: var(--muted); font-weight: 500; }
+      .svg-label.small { font-size: 12.5px; }
+      .leader { stroke: var(--muted); stroke-width: 1; opacity: 0.6; }
+      .img-pt { fill: var(--amber); stroke: #fff; stroke-width: 1.2; }
+      .blur-spot { fill: #ffb020; opacity: 0.55; }
+      .glasses-lens { fill: rgba(150, 200, 225, 0.35); stroke: var(--lens-stroke); stroke-width: 2; }
+      .glasses-arm { stroke: var(--sclera-stroke); stroke-width: 3; stroke-linecap: round; }
+      .glasses-label { font-size: 13.5px; font-weight: 700; fill: var(--accent); }
+      .obj-hit { fill: transparent; cursor: grab; touch-action: none; }
+      .obj-hit:active { cursor: grabbing; }
+      .obj-arrow { fill: #2e75b6; stroke: #1f3864; stroke-width: 1.6; }
+      @media (prefers-color-scheme: dark) { .obj-arrow { fill: #5b9bd5; stroke: #9dc3e6; } }
+      .screen-line { stroke: var(--sclera-stroke); stroke-width: 5; stroke-linecap: round; }
+      .screen-base { stroke: var(--sclera-stroke); stroke-width: 3; stroke-linecap: round; }
+      .water-lens { fill: rgba(140, 205, 225, 0.55); stroke: var(--lens-stroke); stroke-width: 2; }
+      @media (prefers-reduced-motion: reduce) {
+        .effort .fill { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="page-head">
+        <h1>近视与远视的成因及矫正模拟</h1>
+        <p>眼睛的<strong>角膜和晶状体</strong>合起来相当于一个<strong>凸透镜</strong>，<strong>视网膜</strong>相当于光屏。正常眼能把远近物体的像都成在视网膜上；近视眼的像成在<strong>视网膜前方</strong>，远视眼的像成在<strong>视网膜后方</strong>。下面按课本图 4–5–5、图 4–5–6 的讲法，亲手试一试两种眼睛是怎么回事、眼镜又是怎么把它矫正过来的。</p>
+        <button class="offline-btn" id="offlineBtn" type="button">↓ 下载离线版</button><span class="offline-note">单个 HTML 文件，保存到电脑或手机后断网也能打开使用</span>
+      </header>
+
+      <div class="layout">
+        <div class="card stage-card">
+          <svg id="scene" viewBox="0 0 1280 620" role="img" aria-label="近视与远视成因及矫正光路示意图">
+            <defs>
+              <g id="arrowShape">
+                <rect class="obj-arrow" x="-5" y="-64" width="10" height="64" />
+                <polygon class="obj-arrow" points="0,-84 -12,-62 12,-62" />
+                <rect class="obj-arrow" x="-14" y="-2" width="28" height="4" rx="2" />
+              </g>
+            </defs>
+
+            <line class="axis-line" x1="36" y1="310" x2="1246" y2="310" />
+
+            <!-- glasses -->
+            <g id="glassesG" style="display:none">
+              <line class="glasses-arm" id="glassesArm" x1="704" y1="218" x2="918" y2="158" />
+              <path class="glasses-lens" id="glassesPath" d="" />
+              <text class="glasses-label" id="glassesLabel" x="704" y="196" text-anchor="middle"></text>
+            </g>
+
+            <!-- eyeball -->
+            <ellipse class="sclera" id="eyeBall" cx="907" cy="310" rx="169" ry="170" />
+            <path class="retina-arc" id="retinaArc" d="" />
+
+            <!-- rays -->
+            <g id="raysG"></g>
+
+            <!-- blur spot + image point -->
+            <ellipse class="blur-spot" id="blurSpot" cx="-50" cy="-50" rx="3.5" ry="3" />
+            <circle class="img-pt" id="imgPt" r="4.5" cx="-50" cy="-50" style="display:none" />
+            <text class="svg-label small" id="imgLabel" x="-50" y="-50" style="display:none">像</text>
+
+            <!-- iris / pupil -->
+            <rect class="iris" id="irisTop" x="856" y="202" width="17" height="76" rx="8" />
+            <rect class="iris" id="irisBot" x="856" y="342" width="17" height="76" rx="8" />
+            <rect class="pupil" id="pupilRect" x="858" y="278" width="13" height="64" rx="6" />
+
+            <!-- ciliary body + zonules + lens -->
+            <path class="zonule" id="zonTop" d="" />
+            <path class="zonule" id="zonBot" d="" />
+            <rect class="ciliary" id="cilTop" x="884" y="196" width="36" height="22" rx="9" />
+            <rect class="ciliary" id="cilBot" x="884" y="402" width="36" height="22" rx="9" />
+            <path class="lens-body" id="lensPath" d="" />
+            <ellipse class="lens-core" id="lensCore" cx="900" cy="310" rx="4" ry="52" />
+
+            <!-- focal point tick -->
+            <g id="fTick" style="display:none">
+              <line x1="0" y1="302" x2="0" y2="318" stroke="var(--muted)" stroke-width="1.6" id="fTickLine" />
+              <text class="svg-label small" id="fTickText" y="340" text-anchor="middle">焦点 F</text>
+            </g>
+
+            <!-- object (arrow) -->
+            <g id="objG">
+              <use href="#arrowShape" />
+              <rect class="obj-hit" id="objHit" x="-34" y="-102" width="68" height="112" />
+            </g>
+
+            <!-- labels -->
+            <text class="svg-label" id="objLabel" x="300" y="196" text-anchor="middle">物体 · 可拖动</text>
+            <text class="svg-label" x="952" y="168">晶状体</text>
+            <line class="leader" x1="946" y1="176" x2="908" y2="238" />
+            <text class="svg-label" x="996" y="492">睫状肌</text>
+            <line class="leader" x1="986" y1="484" x2="922" y2="428" />
+            <text class="svg-label" id="retinaLabel" x="1066" y="182">视网膜</text>
+            <line class="leader" id="retinaLeader" x1="1060" y1="190" x2="1028" y2="252" />
+            <text class="svg-label small" id="vitreousLabel" x="966" y="430" text-anchor="middle" opacity="0.75">玻璃体</text>
+          </svg>
+          <p class="stage-note">示意图未按真实比例绘制：眼球内部结构放大显示，物距经压缩显示。光线画法与凸透镜成像实验相同：平行于主光轴的光线折射后过焦点、过光心的光线方向不变；光线上的箭头表示光的传播方向。眼镜戴在眼睛前方约 12 mm 处。</p>
+        </div>
+
+        <aside class="panel">
+          <div class="card sec">
+            <h2><span class="step">1</span>眼睛类型</h2>
+            <div class="seg" role="group" aria-label="眼睛类型">
+              <button data-eye="normal" aria-pressed="false">正常眼</button>
+              <button data-eye="myopia" aria-pressed="true">近视眼</button>
+              <button data-eye="hyperopia" aria-pressed="false">远视眼</button>
+            </div>
+            <p class="hint" id="eyeHint"></p>
+          </div>
+
+          <div class="card sec" id="causeSec">
+            <h2><span class="step">2</span>成因（课本两种说法）</h2>
+            <div class="seg" role="group" aria-label="成因" id="causeSeg">
+              <button data-cause="axis" aria-pressed="true">眼轴偏长</button>
+              <button data-cause="lens" aria-pressed="false">晶状体焦距偏短</button>
+            </div>
+            <p class="hint" id="causeHint"></p>
+          </div>
+
+          <div class="card sec">
+            <h2><span class="step">3</span>物体距离</h2>
+            <div class="slider-row">
+              <span class="val" id="uVal">6.0 m</span>
+              <span class="val"><small>物距 u</small></span>
+            </div>
+            <input type="range" id="uSlider" min="0" max="1000" value="1000" aria-label="物距" />
+            <div class="scale-marks"><span>12 cm（近）</span><span>25 cm</span><span>1 m</span><span>6 m（远）</span></div>
+            <div class="chips">
+              <button class="chip" data-u="600">看远处 · 6 m</button>
+              <button class="chip" data-u="25">看近处 · 25 cm（明视距离）</button>
+              <button class="chip" data-u="12">凑近看 · 12 cm</button>
+            </div>
+            <button class="toggle-btn demo-btn" id="demoBtn" aria-pressed="false">▶ 演示：物体由远到近</button>
+          </div>
+
+          <div class="card sec">
+            <h2><span class="step">4</span>矫正眼镜</h2>
+            <div>
+              <button class="toggle-btn" id="glassesBtn" aria-pressed="false">佩戴矫正眼镜</button>
+            </div>
+            <div id="glassesCtl" style="display:none; margin-top:10px">
+              <div class="slider-row">
+                <span class="val" id="gVal">−350 度</span>
+                <span class="val"><small>眼镜度数</small></span>
+              </div>
+              <input type="range" id="gSlider" min="-800" max="-100" step="25" value="-350" aria-label="眼镜度数" />
+              <div class="scale-marks"><span id="gMinLab">−800 度</span><span id="gMaxLab">−100 度</span></div>
+              <button class="toggle-btn fit-btn" id="fitBtn">一键配到合适度数</button>
+              <p class="hint" id="glassesHint"></p>
+            </div>
+            <p class="hint" id="glassesOffHint">先看清“成因”状态下的像，再戴上眼镜，对比像是怎样回到视网膜上的。</p>
+          </div>
+
+          <div class="card sec">
+            <h2>成像情况</h2>
+            <div class="verdict bad" id="verdictBox">
+              <span class="dot" id="verdictDot"></span>
+              <div class="txt">
+                <span class="big" id="verdictText">模糊</span>
+                <span class="sub" id="verdictSub">像落在视网膜前方</span>
+              </div>
+            </div>
+            <p class="explain" id="explainText"></p>
+            <div class="effort">
+              <div class="lab"><span>睫状肌状态</span><span id="effortText">舒张 · 晶状体较薄</span></div>
+              <div class="bar"><div class="fill" id="effortFill"></div></div>
+            </div>
+          </div>
+
+          <div class="card sec">
+            <h2>视网膜上的像</h2>
+            <div class="retina-view">
+              <svg viewBox="0 0 220 160" role="img" aria-label="视网膜上所成的像（倒立、缩小，模糊程度随成像情况变化）">
+                <defs>
+                  <filter id="rb" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur id="rbBlur" stdDeviation="0" />
+                  </filter>
+                </defs>
+                <path d="M 182 12 Q 126 80 182 148" stroke="#b3402a" stroke-width="7" fill="none" stroke-linecap="round" />
+                <line x1="14" y1="80" x2="206" y2="80" stroke="#3d4c5c" stroke-width="1" stroke-dasharray="5 5" />
+                <g id="retinaImg" filter="url(#rb)">
+                  <use href="#arrowShape" />
+                </g>
+              </svg>
+            </div>
+            <p class="retina-cap" id="retinaCap">像没有落在视网膜上，视网膜接收到的是弥散的光斑——这就是“看不清”时的画面。</p>
+          </div>
+
+          <div class="card sec">
+            <h2>数据与公式</h2>
+            <dl class="data">
+              <dt>物距 u</dt><dd id="dU">—</dd>
+              <dt>眼轴长（像距 v）</dt><dd id="dV">—</dd>
+              <dt>晶状体焦距 f</dt><dd id="dF">—</dd>
+              <dt>眼镜度数</dt><dd id="dG">—</dd>
+              <dt>像的位置</dt><dd id="dImg">—</dd>
+            </dl>
+            <div class="formula" id="formulaLine"></div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="water">
+        <h2>自主活动 · 自制水透镜</h2>
+        <p class="lead">课本图 4–5–4：用注射器向透明水袋中注水或抽水，改变水袋的弯曲程度，从而改变水透镜的焦距，模拟睫状肌调节焦距的作用。把水透镜、发光物、光屏放在光具座上，改变水量，观察光屏上像的变化——和眼睛靠改变晶状体厚薄来调焦，是同一个道理。</p>
+        <div class="water-layout">
+          <div class="card stage-card">
+            <svg id="wScene" viewBox="0 0 980 340" role="img" aria-label="自制水透镜实验：改变水量，观察光屏上的像">
+              <defs>
+                <g id="wArrowShape">
+                  <rect class="obj-arrow" x="-5" y="-64" width="10" height="64" />
+                  <polygon class="obj-arrow" points="0,-84 -12,-62 12,-62" />
+                  <rect class="obj-arrow" x="-14" y="-2" width="28" height="4" rx="2" />
+                </g>
+              </defs>
+              <line class="axis-line" x1="30" y1="170" x2="950" y2="170" />
+              <g id="wRays"></g>
+              <ellipse class="blur-spot" id="wBlur" cx="-50" cy="-50" rx="3.5" ry="3" />
+              <circle class="img-pt" id="wImgPt" r="4.5" cx="-50" cy="-50" style="display:none" />
+              <g id="wObjG" transform="translate(120 170)">
+                <use href="#wArrowShape" />
+              </g>
+              <path class="water-lens" id="wLens" d="" />
+              <line class="screen-line" id="wScreen" x1="860" y1="86" x2="860" y2="254" />
+              <line class="screen-base" x1="830" y1="254" x2="890" y2="254" />
+              <text class="svg-label" x="120" y="280" text-anchor="middle">发光物</text>
+              <text class="svg-label" x="490" y="280" text-anchor="middle">水透镜</text>
+              <text class="svg-label" x="860" y="280" text-anchor="middle">光屏</text>
+              <text class="svg-label small" x="490" y="60" text-anchor="middle" id="wFLab"></text>
+            </svg>
+            <p class="stage-note">物距、光屏位置固定不变，只改变水量（也就是改变透镜的焦距）。找到让光屏上的像最清晰的水量，再想一想：这和眼睛看远、看近时睫状肌做的事情有什么相同和不同？</p>
+          </div>
+          <div class="card sec">
+            <h2>水量</h2>
+            <div class="slider-row">
+              <span class="val" id="wVal">64%</span>
+              <span class="val"><small>水量</small></span>
+            </div>
+            <input type="range" id="wSlider" min="0" max="100" step="1" value="64" aria-label="水量" />
+            <div class="scale-marks"><span>0%（瘪）</span><span>100%（鼓）</span></div>
+            <p class="water-verdict bad" id="wVerdict">像模糊：水太少，焦距太长</p>
+            <p class="hint" id="wHint">水透镜焦距约 120 mm，太长了，光线到光屏时还没会聚成一点。注水让透镜变鼓、焦距变短试试。</p>
+            <dl class="data" style="margin-top:12px">
+              <dt>水透镜焦距 f</dt><dd id="wF">—</dd>
+              <dt>物距 u</dt><dd>150 mm（固定）</dd>
+              <dt>像距 v（光屏）</dt><dd>150 mm（固定）</dd>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section class="knowledge">
+        <h2>近视与远视，对照着看</h2>
+        <p class="lead">课本第 5 节的核心就是下面这张对照表。成因各有两种说法（眼轴、晶状体），但结果只有一个：像没有落在视网膜上。</p>
+        <div class="kgrid">
+          <div class="card kcard">
+            <h3>三种眼睛对照表</h3>
+            <table class="cmp">
+              <thead><tr><th></th><th>正常眼</th><th>近视眼</th><th>远视眼</th></tr></thead>
+              <tbody>
+                <tr><th>成因</th><td>眼轴、晶状体都正常</td><td>晶状体焦距偏短，或眼轴偏长</td><td>晶状体焦距偏长，或眼轴偏短</td></tr>
+                <tr><th>像的位置</th><td>视网膜上</td><td>视网膜前方</td><td>视网膜后方</td></tr>
+                <tr><th>看远处</th><td>清晰</td><td>模糊</td><td>清晰</td></tr>
+                <tr><th>看近处</th><td>清晰</td><td>清晰</td><td>模糊</td></tr>
+                <tr><th>矫正镜片</th><td>不需要</td><td>凹透镜（发散）</td><td>凸透镜（会聚）</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card kcard">
+            <span class="tag">近视眼</span>
+            <h3>像成在视网膜前方</h3>
+            <p>近视的同学不戴眼镜能看清近处的物体，但是无论眼睛的睫状肌如何努力调节都不能看清远处的物体。形成近视眼的原因是晶状体的焦距偏短或者眼轴偏长，来自远处物体的光会聚在视网膜前，到达视网膜时已经不是一个点，而是一片模糊的光斑。</p>
+            <p>矫正：利用凹透镜使光发散的特点，在眼睛前放一个合适的凹透镜，就能使光重新会聚在视网膜上，便能看清远处的物体了。</p>
+          </div>
+          <div class="card kcard">
+            <span class="tag">远视眼</span>
+            <h3>像成在视网膜后方</h3>
+            <p>形成远视眼的原因是晶状体的焦距偏长或者眼轴较短，近处物体的光还没有会聚成一点就到达视网膜了，这时看到的物体也是模糊的。</p>
+            <p>矫正：利用凸透镜对光的会聚作用，在眼睛前放一个合适的凸透镜，使近处物体的光会聚在视网膜上，便能看清近处的物体了。</p>
+          </div>
+          <div class="card kcard">
+            <span class="tag">明视距离 · 保护视力</span>
+            <h3>25 cm，不要一直凑近看</h3>
+            <p>睫状肌的调节能力是有限的，眼睛观察近处物体最清晰又不容易疲劳的距离大约是 25 cm，这个距离叫做明视距离。为了保护视力，学习时应保持眼睛与书本的距离在 25 cm 左右。</p>
+            <p>长时间用眼看书，特别是近距离看书会让睫状肌始终处于收缩状态，容易损害眼睛的调节功能，造成近视。</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>模型为简化眼：角膜与晶状体合并为一个薄透镜；眼轴长、焦距、眼镜度数均为示意值，帮助理解成因与矫正的道理。内容依据八年级上册教材第 4 章第 5 节《透镜的应用》（图 4–5–2～图 4–5–6）。</footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var $ = function (id) { return document.getElementById(id); };
+
+        /* ================= main simulation ================= */
+        var XL = 900, CY = 310, S = 6.2;      // eye lens center x, axis y, px per mm
+        var DG = 12;                          // glasses to eye lens, mm
+        var H0 = 84 / S;                      // object height, mm (arrow tip above axis)
+
+        var EYES = {
+          normal: {
+            name: "正常眼", v0: 20.0, fMin: 16.7, fMax: 20.0,
+            causes: null,
+            hint: "眼轴长 20.0 mm，晶状体焦距可在 16.7–20.0 mm 间调节，远近都能看清。"
+          },
+          myopia: {
+            name: "近视眼", v0: 20.0, fMin: 16.7, fMax: 20.0,
+            causes: {
+              axis: { label: "眼轴偏长", v0: 21.5, fMin: 16.7, fMax: 20.0,
+                      hint: "眼轴长 21.5 mm：视网膜比正常眼靠后，晶状体调节范围不变，远处物体的像落在视网膜前方。" },
+              lens: { label: "晶状体焦距偏短", v0: 20.0, fMin: 15.0, fMax: 18.0,
+                      hint: "晶状体太厚、折光能力太强：焦距只能在 15.0–18.0 mm 间变化，即使放到最薄也拉不回远处物体的像。" }
+            },
+            hint: "近视眼看近清楚、看远模糊。成因有两种说法，试试上面两个按钮。"
+          },
+          hyperopia: {
+            name: "远视眼", v0: 20.0, fMin: 16.7, fMax: 20.0,
+            causes: {
+              axis: { label: "眼轴偏短", v0: 17.0, fMin: 16.7, fMax: 20.0,
+                      hint: "眼轴长只有 17.0 mm：视网膜比正常眼靠前，晶状体调节范围不变，近处物体的像落在视网膜后方。" },
+              lens: { label: "晶状体焦距偏长", v0: 20.0, fMin: 19.0, fMax: 22.0,
+                      hint: "晶状体太薄、折光能力太弱：焦距只能在 19.0–22.0 mm 间变化，即使变到最厚也补不回近处物体的像。" }
+            },
+            hint: "远视眼看远清楚、看近模糊。成因有两种说法，试试上面两个按钮。"
+          }
+        };
+
+        var state = {
+          eye: "myopia",
+          cause: "axis",
+          u_cm: 600,
+          glassesOn: false,
+          gDeg: -350,           // glasses power in degrees (度）, negative = concave
+          fEye: 20.0,           // animated current eye focal length, mm
+          demo: false,
+          demoT: 0
+        };
+
+        function eyeDef() {
+          var e = EYES[state.eye];
+          if (e.causes) return e.causes[state.cause];
+          return e;
+        }
+        function glassesF() {   // glasses focal length mm, Infinity when off
+          if (!state.glassesOn) return Infinity;
+          if (Math.abs(state.gDeg) < 5) return Infinity;
+          return 1000 / (state.gDeg / 100);   // 度数 / 100 = 焦度 D; f(mm) = 1000 / D
+        }
+
+        /* ---- paraxial ray tracer (two thin lenses) ----
+           NOTE: the image point is the INTERSECTION of two rays from the
+           object tip, not where one ray crosses the axis (that is only the
+           focal point). traceRay returns the ray state after the eye lens. */
+        function traceRay(y0, th0, fG, fE, u_mm) {
+          var uG = u_mm - DG;
+          var yG = y0 + th0 * uG;
+          var th1 = isFinite(fG) ? th0 - yG / fG : th0;
+          var yE = yG + th1 * DG;
+          var th2 = th1 - yE / fE;
+          return { yG: yG, yE: yE, th2: th2 };
+        }
+        /* image point = intersection of the parallel ray and the chief ray */
+        function imagePoint(fE, u_mm) {
+          var fG = glassesF();
+          var r1 = traceRay(H0, 0, fG, fE, u_mm);
+          var r2 = traceRay(H0, -H0 / u_mm, fG, fE, u_mm);
+          var dth = r1.th2 - r2.th2;
+          if (Math.abs(dth) < 1e-12) return { x: Infinity, y: 0 };
+          var x = (r2.yE - r1.yE) / dth;
+          var y = r1.yE + r1.th2 * x;
+          return { x: x, y: y };
+        }
+        function imageX(fE, u_mm) {
+          return imagePoint(fE, u_mm).x;
+        }
+        /* accommodation: find fE in [fMin,fMax] putting the image on the retina */
+        function accommodate(def, u_mm) {
+          var L = def.v0;
+          var xMax = imageX(def.fMax, u_mm);   // weakest lens -> farthest image
+          var xMin = imageX(def.fMin, u_mm);   // strongest lens -> nearest image
+          if (xMax < L) return def.fMax;        // even weakest focuses in front
+          if (xMin > L) return def.fMin;        // even strongest focuses behind
+          var lo = def.fMin, hi = def.fMax;
+          for (var i = 0; i < 48; i++) {
+            var mid = (lo + hi) / 2;
+            if (imageX(mid, u_mm) < L) lo = mid; else hi = mid;
+          }
+          return (lo + hi) / 2;
+        }
+        /* fit glasses: fE clamped to the required value, search power for image on retina */
+        function fitGlasses(def, u_mm) {
+          var fReq = 1 / (1 / def.v0 + 1 / u_mm);
+          var fFit = Math.min(Math.max(fReq, def.fMin), def.fMax);
+          var saved = state.glassesOn, savedDeg = state.gDeg;
+          state.glassesOn = true;
+          var lo, hi;
+          if (state.eye === "myopia") { lo = -800; hi = -50; }
+          else { lo = 50; hi = 800; }
+          function imgAt(deg) {
+            state.gDeg = deg;
+            return imagePoint(fFit, u_mm).x;
+          }
+          var xLo = imgAt(lo), xHi = imgAt(hi);
+          var deg;
+          if (state.eye === "myopia") {
+            // 凹透镜越强（度数越负），像越往后推：x(deg) 随 deg 增大而减小
+            if (xLo <= def.v0) deg = lo;       // 最强的镜片像仍在视网膜前
+            else if (xHi >= def.v0) deg = hi;  // 最弱的镜片像已到视网膜后
+            else {
+              var a = lo, b = hi;
+              for (var i = 0; i < 40; i++) {
+                var m = (a + b) / 2;
+                if (imgAt(m) < def.v0) b = m; else a = m;
+              }
+              deg = (a + b) / 2;
+            }
+          } else {
+            if (xLo <= def.v0) deg = lo;
+            else if (xHi >= def.v0) deg = hi;
+            else {
+              var a2 = lo, b2 = hi;
+              for (var j = 0; j < 40; j++) {
+                var m2 = (a2 + b2) / 2;
+                if (imgAt(m2) < def.v0) b2 = m2; else a2 = m2;
+              }
+              deg = (a2 + b2) / 2;
+            }
+          }
+          state.glassesOn = saved; state.gDeg = savedDeg;
+          return Math.round(deg / 25) * 25;
+        }
+
+        /* ---- dom ---- */
+        var uSlider = $("uSlider"), uVal = $("uVal");
+        var gSlider = $("gSlider"), gVal = $("gVal");
+        var raysG = $("raysG"), lensPath = $("lensPath"), lensCore = $("lensCore");
+        var retinaArc = $("retinaArc"), eyeBall = $("eyeBall"), blurSpot = $("blurSpot");
+        var imgPt = $("imgPt"), imgLabel = $("imgLabel");
+        var zonTop = $("zonTop"), zonBot = $("zonBot"), cilTop = $("cilTop"), cilBot = $("cilBot");
+        var irisTop = $("irisTop"), irisBot = $("irisBot"), pupilRect = $("pupilRect");
+        var objG = $("objG"), objLabel = $("objLabel");
+        var glassesG = $("glassesG"), glassesPath = $("glassesPath"), glassesLabel = $("glassesLabel");
+        var fTick = $("fTick"), fTickLine = $("fTickLine"), fTickText = $("fTickText");
+        var retinaImg = $("retinaImg"), rbBlur = $("rbBlur"), retinaCap = $("retinaCap");
+        var retinaLabel = $("retinaLabel"), retinaLeader = $("retinaLeader"), vitreousLabel = $("vitreousLabel");
+
+        function uToT(u) { return Math.log(u / 12) / Math.log(50); }
+        function tToU(t) { return 12 * Math.pow(50, t); }
+        function uToPx(u) { return 165 + 545 * uToT(u); }
+        function fmtU(u) {
+          if (u >= 595) return "6.0 m";
+          if (u >= 100) return (u / 100).toFixed(2).replace(/0$/, "") + " m";
+          return Math.round(u) + " cm";
+        }
+        function fmt1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+        function fmtDeg(d) { return (d > 0 ? "+" : d < 0 ? "−" : "") + Math.abs(d) + " 度"; }
+
+        /* ---- controls ---- */
+        uSlider.addEventListener("input", function () {
+          stopDemo();
+          state.u_cm = tToU(uSlider.value / 1000);
+          syncChips();
+        });
+        var chips = Array.prototype.slice.call(document.querySelectorAll(".chip[data-u]"));
+        chips.forEach(function (c) {
+          c.addEventListener("click", function () {
+            stopDemo();
+            state.u_cm = parseFloat(c.getAttribute("data-u"));
+            uSlider.value = Math.round(uToT(state.u_cm) * 1000);
+            syncChips();
+          });
+        });
+        function syncChips() {
+          chips.forEach(function (c) {
+            c.setAttribute("aria-pressed", Math.abs(parseFloat(c.getAttribute("data-u")) - state.u_cm) < 0.6 ? "true" : "false");
+          });
+          uVal.textContent = fmtU(state.u_cm);
+        }
+
+        var eyeBtns = Array.prototype.slice.call(document.querySelectorAll("[data-eye]"));
+        var eyeHint = $("eyeHint"), causeSec = $("causeSec"), causeSeg = $("causeSeg");
+        var causeHint = $("causeHint");
+        eyeBtns.forEach(function (b) {
+          b.addEventListener("click", function () { setEye(b.getAttribute("data-eye")); });
+        });
+        function setEye(key) {
+          state.eye = key;
+          eyeBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-eye") === key ? "true" : "false"); });
+          var e = EYES[key];
+          eyeHint.textContent = e.hint;
+          if (e.causes) {
+            causeSec.style.display = "";
+            var btns = Array.prototype.slice.call(causeSeg.querySelectorAll("button"));
+            var keys = Object.keys(e.causes);
+            btns.forEach(function (b, i) {
+              b.textContent = e.causes[keys[i]].label;
+              b.setAttribute("data-cause", keys[i]);
+              b.setAttribute("aria-pressed", keys[i] === state.cause ? "true" : "false");
+            });
+            if (!e.causes[state.cause]) state.cause = keys[0];
+            causeHint.textContent = e.causes[state.cause].hint;
+          } else {
+            causeSec.style.display = "none";
+          }
+          // default object distance for the demo: myopia -> far, hyperopia -> near
+          state.u_cm = key === "hyperopia" ? 25 : key === "myopia" ? 600 : 100;
+          uSlider.value = Math.round(uToT(state.u_cm) * 1000);
+          syncChips();
+          // glasses reset
+          state.glassesOn = false;
+          syncGlassesUI();
+        }
+        Array.prototype.slice.call(causeSeg.querySelectorAll("button")).forEach(function (b) {
+          b.addEventListener("click", function () {
+            state.cause = b.getAttribute("data-cause");
+            Array.prototype.slice.call(causeSeg.querySelectorAll("button")).forEach(function (x) {
+              x.setAttribute("aria-pressed", x === b ? "true" : "false");
+            });
+            causeHint.textContent = EYES[state.eye].causes[state.cause].hint;
+          });
+        });
+
+        var glassesBtn = $("glassesBtn"), glassesCtl = $("glassesCtl");
+        var glassesHint = $("glassesHint"), glassesOffHint = $("glassesOffHint");
+        var gMinLab = $("gMinLab"), gMaxLab = $("gMaxLab");
+        function glassesRange() {
+          if (state.eye === "myopia") return { min: -800, max: -100 };
+          return { min: 100, max: 800 };
+        }
+        function syncGlassesUI() {
+          var e = EYES[state.eye];
+          if (!e.causes) {
+            glassesBtn.disabled = true;
+            glassesBtn.textContent = "正常眼无需眼镜";
+            glassesCtl.style.display = "none";
+            glassesOffHint.textContent = "正常眼靠睫状肌调节就能看清远近，不需要眼镜。";
+            return;
+          }
+          glassesBtn.disabled = false;
+          var kind = state.eye === "myopia" ? "凹透镜" : "凸透镜";
+          glassesBtn.setAttribute("aria-pressed", state.glassesOn ? "true" : "false");
+          glassesBtn.textContent = state.glassesOn ? "摘下眼镜（" + kind + " " + fmtDeg(state.gDeg) + "）" : "佩戴矫正眼镜（" + kind + "）";
+          glassesCtl.style.display = state.glassesOn ? "block" : "none";
+          glassesOffHint.textContent = state.glassesOn
+            ? "眼镜先把光线" + (state.eye === "myopia" ? "发散" : "会聚") + "一次，再由晶状体成像。拖动度数滑块，看度数不合适时会怎样。"
+            : "先看清“成因”状态下的像，再戴上眼镜，对比像是怎样回到视网膜上的。";
+          if (state.glassesOn) {
+            var r = glassesRange();
+            gSlider.min = r.min; gSlider.max = r.max;
+            gMinLab.textContent = fmtDeg(r.min); gMaxLab.textContent = fmtDeg(r.max);
+            gSlider.value = state.gDeg;
+            gVal.textContent = fmtDeg(state.gDeg);
+            glassesHint.textContent = state.eye === "myopia"
+              ? "凹透镜使光发散：近视度数越深，发散得越厉害。"
+              : "凸透镜使光会聚：远视度数越高，会聚得越厉害。";
+          }
+        }
+        glassesBtn.addEventListener("click", function () {
+          if (!EYES[state.eye].causes) return;
+          state.glassesOn = !state.glassesOn;
+          if (state.glassesOn) {
+            state.gDeg = fitGlasses(eyeDef(), state.u_cm * 10);
+          }
+          syncGlassesUI();
+        });
+        gSlider.addEventListener("input", function () {
+          state.gDeg = parseInt(gSlider.value, 10);
+          gVal.textContent = fmtDeg(state.gDeg);
+          syncGlassesUI();
+        });
+        $("fitBtn").addEventListener("click", function () {
+          state.gDeg = fitGlasses(eyeDef(), state.u_cm * 10);
+          syncGlassesUI();
+        });
+
+        var demoBtn = $("demoBtn");
+        demoBtn.addEventListener("click", function () {
+          if (state.demo) { stopDemo(); return; }
+          state.demo = true; state.demoT = 0;
+          demoBtn.setAttribute("aria-pressed", "true");
+          demoBtn.textContent = "■ 停止演示";
+        });
+        function stopDemo() {
+          if (!state.demo) return;
+          state.demo = false;
+          demoBtn.setAttribute("aria-pressed", "false");
+          demoBtn.textContent = "▶ 演示：物体由远到近";
+        }
+
+        var drag = null;
+        $("objHit").addEventListener("pointerdown", function (ev) {
+          drag = { x: ev.clientX, ud: uToPx(state.u_cm) };
+          ev.target.setPointerCapture(ev.pointerId);
+          stopDemo();
+        });
+        $("objHit").addEventListener("pointermove", function (ev) {
+          if (!drag) return;
+          var svg = $("scene");
+          var scale = svg.viewBox.baseVal.width / svg.getBoundingClientRect().width;
+          var ud = Math.min(710, Math.max(165, drag.ud - (ev.clientX - drag.x) * scale));
+          var t = (ud - 165) / 545;
+          state.u_cm = tToU(t);
+          uSlider.value = Math.round(t * 1000);
+          syncChips();
+        });
+        $("objHit").addEventListener("pointerup", function () { drag = null; });
+        $("objHit").addEventListener("pointercancel", function () { drag = null; });
+
+        /* ---- render helpers ---- */
+        function arrowAt(x1, y1, x2, y2, t, op) {
+          var dx = x2 - x1, dy = y2 - y1;
+          var len = Math.sqrt(dx * dx + dy * dy);
+          if (len < 26) return "";
+          var ux = dx / len, uy = dy / len;
+          var px = x1 + dx * t, py = y1 + dy * t;
+          var L = 13, W = 4.8;
+          var tipX = px + ux * L / 2, tipY = py + uy * L / 2;
+          var bX = px - ux * L / 2, bY = py - uy * L / 2;
+          var nx = -uy, ny = ux;
+          return '<polygon points="' +
+            tipX.toFixed(1) + "," + tipY.toFixed(1) + " " +
+            (bX + nx * W).toFixed(1) + "," + (bY + ny * W).toFixed(1) + " " +
+            (bX - nx * W).toFixed(1) + "," + (bY - ny * W).toFixed(1) +
+            '" fill="var(--ray)" opacity="' + op + '"/>';
+        }
+        function arcPath(cx, cy, r, a0, a1) {
+          var x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+          var x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+          return "M " + x0.toFixed(1) + " " + y0.toFixed(1) + " A " + r + " " + r + " 0 0 1 " + x1.toFixed(1) + " " + y1.toFixed(1);
+        }
+
+        function render() {
+          var def = eyeDef();
+          var u_mm = state.u_cm * 10;
+          var fTarget = accommodate(def, u_mm);
+          state.fEye += (fTarget - state.fEye) * 0.14;
+          if (Math.abs(fTarget - state.fEye) < 0.005) state.fEye = fTarget;
+          var fE = state.fEye;
+          var fG = glassesF();
+          var L = def.v0;
+          var Peye = 1000 / fE;
+          var effort = (Peye - 1000 / def.fMax) / (1000 / def.fMin - 1000 / def.fMax);
+          effort = Math.min(1, Math.max(0, effort));
+
+          /* trace three rays from the arrow tip */
+          var slopes = [0, -H0 / u_mm, -H0 / (2 * u_mm)];
+          var rays = slopes.map(function (th0) { return traceRay(H0, th0, fG, fE, u_mm); });
+          var ip = imagePoint(fE, u_mm);
+          var xImg = ip.x, yImg = ip.y;
+
+          /* geometry (px) */
+          var retinaX = XL + L * S;
+          var vImgD = isFinite(xImg) ? Math.min(xImg * S, 460) : 460;
+          var xi = XL + vImgD, yi = CY - yImg * S;
+          var ud = uToPx(state.u_cm);
+          var xo = XL - ud, yTop = CY - 84;
+          var gx = XL - 196;
+
+          /* eyeball + retina */
+          var frontX = XL - 162, backX = retinaX + 52;
+          eyeBall.setAttribute("cx", ((frontX + backX) / 2).toFixed(1));
+          eyeBall.setAttribute("rx", ((backX - frontX) / 2).toFixed(1));
+          retinaArc.setAttribute("d", arcPath(XL, CY, L * S, -0.98, 0.98));
+          retinaLabel.setAttribute("x", backX + 14);
+          retinaLeader.setAttribute("x1", backX + 8);
+          retinaLeader.setAttribute("x2", retinaX + 4);
+          retinaLeader.setAttribute("y2", CY - 62);
+          vitreousLabel.setAttribute("x", retinaX - 58);
+
+          /* lens shape from current power */
+          var thick = 7 + (Peye - 50) * 1.1;
+          thick = Math.max(6, Math.min(18, thick));
+          var H = 86;
+          lensPath.setAttribute("d",
+            "M " + XL + " " + (CY - H) +
+            " Q " + (XL + thick) + " " + CY + " " + XL + " " + (CY + H) +
+            " Q " + (XL - thick) + " " + CY + " " + XL + " " + (CY - H) + " Z");
+          lensCore.setAttribute("rx", Math.max(2.5, thick * 0.32));
+
+          /* ciliary body + zonules */
+          var anchOff = 99 - effort * 13;
+          cilTop.setAttribute("y", CY - anchOff - 11);
+          cilBot.setAttribute("y", CY + anchOff - 11);
+          var sag = effort * 7;
+          zonTop.setAttribute("d",
+            "M " + (XL + 4) + " " + (CY - anchOff + 4) +
+            " Q " + (XL - 2) + " " + (CY - (anchOff + H) / 2 + sag) + " " + XL + " " + (CY - H + 3) +
+            " M " + (XL + 16) + " " + (CY - anchOff + 6) +
+            " Q " + (XL + 6) + " " + (CY - (anchOff + H) / 2 + sag) + " " + (XL + 2) + " " + (CY - H + 10));
+          zonBot.setAttribute("d",
+            "M " + (XL + 4) + " " + (CY + anchOff - 4) +
+            " Q " + (XL - 2) + " " + (CY + (anchOff + H) / 2 - sag) + " " + XL + " " + (CY + H - 3) +
+            " M " + (XL + 16) + " " + (CY + anchOff - 6) +
+            " Q " + (XL + 6) + " " + (CY + (anchOff + H) / 2 - sag) + " " + (XL + 2) + " " + (CY + H - 10));
+
+          /* pupil: near reflex narrows it slightly */
+          var pupilH = 64 - effort * 14;
+          pupilRect.setAttribute("y", CY - pupilH / 2);
+          pupilRect.setAttribute("height", pupilH);
+          irisTop.setAttribute("height", 110 - pupilH / 2);
+          irisBot.setAttribute("y", CY + pupilH / 2 - 2);
+          irisBot.setAttribute("height", 110 - pupilH / 2);
+
+          /* glasses */
+          if (state.glassesOn) {
+            glassesG.style.display = "";
+            var gh = 92;
+            if (state.gDeg < 0) {
+              glassesPath.setAttribute("d",
+                "M " + gx + " " + (CY - gh) +
+                " Q " + (gx + 10) + " " + CY + " " + gx + " " + (CY + gh) +
+                " Q " + (gx - 10) + " " + CY + " " + gx + " " + (CY - gh) + " Z");
+            } else {
+              glassesPath.setAttribute("d",
+                "M " + gx + " " + (CY - gh) +
+                " Q " + (gx - 15) + " " + CY + " " + gx + " " + (CY + gh) +
+                " Q " + (gx + 15) + " " + CY + " " + gx + " " + (CY - gh) + " Z");
+            }
+            glassesLabel.textContent = (state.gDeg < 0 ? "凹透镜 " : "凸透镜 ") + fmtDeg(state.gDeg);
+          } else {
+            glassesG.style.display = "none";
+          }
+
+          /* object + label */
+          objG.setAttribute("transform", "translate(" + xo + " " + CY + ")");
+          objLabel.setAttribute("x", xo);
+
+          /* rays */
+          var html = "", yAtRetina = [];
+          rays.forEach(function (r) {
+            var yGPx = CY - r.yG * S, yEPx = CY - r.yE * S;
+            var yR = r.yE + r.th2 * L;
+            var yRPx = CY - yR * S;
+            yAtRetina.push(yRPx);
+            html += '<path class="ray" d="M ' + xo + " " + yTop + " L " + gx + " " + yGPx.toFixed(1) + " L " + XL + " " + yEPx.toFixed(1);
+            if (isFinite(xImg) && xImg <= L) {
+              html += " L " + xi.toFixed(1) + " " + yi.toFixed(1) + '"/>';
+              html += arrowAt(xo, yTop, gx, yGPx, 0.5, 0.95);
+              html += arrowAt(XL, yEPx, xi, yi, 0.42, 0.95);
+              html += '<path class="ray-dash" d="M ' + xi.toFixed(1) + " " + yi.toFixed(1) + " L " + retinaX.toFixed(1) + " " + yRPx.toFixed(1) + '"/>';
+              html += arrowAt(xi, yi, retinaX, yRPx, 0.5, 0.55);
+            } else {
+              html += " L " + retinaX.toFixed(1) + " " + yRPx.toFixed(1) + '"/>';
+              html += arrowAt(xo, yTop, gx, yGPx, 0.5, 0.95);
+              html += arrowAt(XL, yEPx, retinaX, yRPx, 0.42, 0.95);
+              if (isFinite(xImg)) {
+                html += '<path class="ray-dash" d="M ' + retinaX.toFixed(1) + " " + yRPx.toFixed(1) + " L " + xi.toFixed(1) + " " + yi.toFixed(1) + '"/>';
+                html += arrowAt(retinaX, yRPx, xi, yi, 0.5, 0.55);
+              }
+            }
+          });
+          raysG.innerHTML = html;
+
+          /* blur spot on retina */
+          var yMin = Math.min.apply(null, yAtRetina), yMax = Math.max.apply(null, yAtRetina);
+          var spread = yMax - yMin, yMid = (yMin + yMax) / 2;
+          var focused = spread <= 6;
+          blurSpot.setAttribute("cx", retinaX - 1);
+          blurSpot.setAttribute("cy", yMid.toFixed(1));
+          blurSpot.setAttribute("ry", Math.max(2.5, spread / 2));
+          blurSpot.style.display = spread > 4 ? "" : "none";
+          retinaArc.setAttribute("class", focused ? "retina-arc focused" : "retina-arc");
+
+          /* image point marker + focal tick */
+          if (!focused && isFinite(xImg) && Math.abs(xImg - L) > 0.4) {
+            imgPt.style.display = ""; imgLabel.style.display = "";
+            imgPt.setAttribute("cx", xi.toFixed(1)); imgPt.setAttribute("cy", yi.toFixed(1));
+            imgLabel.setAttribute("x", (xi + 4).toFixed(1));
+            imgLabel.setAttribute("y", (yi - 16).toFixed(1));
+            imgLabel.setAttribute("text-anchor", "middle");
+          } else {
+            imgPt.style.display = "none"; imgLabel.style.display = "none";
+          }
+          var xF = XL + fE * S;
+          if (xF > XL + 30 && xF < retinaX + 130) {
+            fTick.style.display = "";
+            fTickLine.setAttribute("x1", xF); fTickLine.setAttribute("x2", xF);
+            fTickText.setAttribute("x", xF);
+          } else { fTick.style.display = "none"; }
+
+          /* retinal preview: inverted arrow, size by magnification, blur by defocus */
+          var mD = vImgD / ud;
+          var hPrev = Math.max(9, Math.min(100, 84 * mD * 2.1));
+          var sc = hPrev / 84;
+          retinaImg.setAttribute("transform", "translate(86 80) scale(" + sc.toFixed(3) + " " + (-sc).toFixed(3) + ")");
+          rbBlur.setAttribute("stdDeviation", Math.min(7, spread / 6).toFixed(2));
+
+          updatePanel(def, u_mm, fE, effort, xImg, yImg, spread, focused, vImgD, ud);
+        }
+
+        function frac(a, b) {
+          return '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>';
+        }
+
+        function updatePanel(def, u_mm, fE, effort, xImg, yImg, spread, focused, vImgD, ud) {
+          var L = def.v0;
+          var inFront = isFinite(xImg) && xImg < L - 0.3;
+          var behind = !isFinite(xImg) || xImg > L + 0.3;
+          var posTxt, cls;
+          if (focused) { cls = "ok"; posTxt = "像正落在视网膜上"; }
+          else if (spread <= 20) { cls = "mid"; posTxt = inFront ? "像在视网膜前方一点" : "像在视网膜后方一点"; }
+          else { cls = "bad"; posTxt = inFront ? "像落在视网膜前方" : "像落在视网膜后方"; }
+
+          var vBox = $("verdictBox");
+          vBox.className = "verdict " + cls;
+          $("verdictDot").style.background = cls === "ok" ? "var(--good)" : cls === "mid" ? "var(--mid)" : "var(--bad)";
+          $("verdictText").textContent = focused ? "清晰" : spread <= 20 ? "基本清晰" : "模糊";
+          $("verdictSub").textContent = posTxt + " · 倒立、缩小的实像";
+
+          var ex;
+          if (focused) {
+            if (state.eye === "normal") {
+              ex = effort > 0.62 ? "看近处：睫状肌收缩，晶状体变厚，焦距变短，像正落在视网膜上。"
+                : effort < 0.3 ? "看远处：睫状肌舒张，晶状体较薄，焦距较长，像正落在视网膜上，眼睛处于放松状态。"
+                : "睫状肌恰到好处地调节，晶状体厚薄适中，像正落在视网膜上。";
+            } else if (state.glassesOn) {
+              ex = state.eye === "myopia"
+                ? "矫正成功：凹透镜先把光线发散一些，再由晶状体成像，像重新会聚在视网膜上，看清远处了。"
+                : "矫正成功：凸透镜先把光线会聚一些，再由晶状体成像，像重新会聚在视网膜上，看清近处了。";
+            } else {
+              ex = "这个距离下还能看清，换个距离试试。";
+            }
+          } else if (inFront) {
+            ex = "光线在到达视网膜之前就已经会聚成像，落到视网膜上的是一个模糊的光斑。";
+            if (state.eye === "myopia" && !state.glassesOn) {
+              ex += state.cause === "axis"
+                ? "近视眼的眼轴偏长：视网膜比正常眼靠后，晶状体放到最薄也拉不回这个像。"
+                : "近视眼的晶状体焦距偏短：折光能力太强，即使放到最薄，远处物体的像还是落在视网膜前面。";
+              ex += "点“佩戴矫正眼镜”，让凹透镜先把光发散一下。";
+            } else if (state.eye === "myopia" && state.glassesOn) {
+              ex += "凹透镜度数配得不够深，像还没推回到视网膜上——把度数调高（更负）试试，或点“一键配到合适度数”。";
+            } else if (state.eye === "hyperopia" && state.glassesOn) {
+              ex += "凸透镜度数配得太高了，像被拉到了视网膜前面——把度数调低试试。";
+            } else {
+              ex += "晶状体已经放到最薄，折光能力仍嫌太强。";
+            }
+          } else {
+            ex = "光线到达视网膜时还没会聚成一点，像落在了视网膜后方，视网膜上是模糊的光斑。";
+            if (state.eye === "hyperopia" && !state.glassesOn) {
+              ex += state.cause === "axis"
+                ? "远视眼的眼轴偏短：视网膜比正常眼靠前，晶状体变到最厚也补不回来。"
+                : "远视眼的晶状体焦距偏长：折光能力太弱，即使变到最厚，近处物体的像还是落在视网膜后面。";
+              ex += "点“佩戴矫正眼镜”，让凸透镜先把光会聚一下。";
+            } else if (state.eye === "hyperopia" && state.glassesOn) {
+              ex += "凸透镜度数配得不够高，像还没拉回到视网膜上——把度数调高试试，或点“一键配到合适度数”。";
+            } else if (state.eye === "myopia" && state.glassesOn) {
+              ex += "凹透镜度数配得太深了，像被推到了视网膜后面——把度数调低（绝对值变小）试试。";
+            } else {
+              ex += "晶状体已经变到最厚，焦距仍不够短。";
+            }
+          }
+          $("explainText").textContent = ex;
+
+          $("effortFill").style.width = (effort * 100).toFixed(0) + "%";
+          $("effortText").textContent =
+            effort > 0.62 ? "收缩 · 晶状体较厚" :
+            effort < 0.3 ? "舒张 · 晶状体较薄" : "部分收缩 · 晶状体适中";
+
+          $("dU").innerHTML = "<b>" + fmtU(state.u_cm) + "</b>（" + Math.round(u_mm) + " mm）";
+          $("dV").innerHTML = "<b>" + fmt1(L) + " mm</b>（固定不变）";
+          $("dF").innerHTML = "<b>" + fmt1(fE) + " mm</b>（调节范围 " + fmt1(def.fMin) + "–" + fmt1(def.fMax) + " mm）";
+          $("dG").innerHTML = state.glassesOn
+            ? "<b>" + fmtDeg(state.gDeg) + "</b>（" + (state.gDeg < 0 ? "凹透镜" : "凸透镜") + "）"
+            : "未佩戴";
+          var dImgTxt;
+          if (!isFinite(xImg)) dImgTxt = "像在无穷远";
+          else if (focused) dImgTxt = "<b>正好在视网膜上</b>";
+          else if (inFront) dImgTxt = "视网膜前 <b>" + fmt1(L - xImg) + " mm</b>";
+          else dImgTxt = "视网膜后 <b>" + fmt1(xImg - L) + " mm</b>";
+          $("dImg").innerHTML = dImgTxt;
+
+          var fEff = isFinite(xImg) && xImg > 0 ? 1 / (1 / u_mm + 1 / xImg) : null;
+          $("formulaLine").innerHTML = fEff
+            ? frac(1, "f") + " ＝ " + frac(1, "u") + " ＋ " + frac(1, "v") +
+              " → " + frac(1, fmt1(fEff)) + " ＝ " + frac(1, Math.round(u_mm)) + " ＋ " + frac(1, fmt1(xImg)) +
+              ' <span class="unit">（长度单位：mm；f 为眼镜与晶状体的等效焦距）</span>'
+            : frac(1, "f") + " ＝ " + frac(1, "u") + " ＋ " + frac(1, "v") +
+              ' <span class="unit">（长度单位：mm）</span>';
+
+          retinaCap.textContent = focused
+            ? "视网膜上成倒立、缩小的实像，大脑再把它“翻”正——这就是你“看清”时的画面。"
+            : "像没有落在视网膜上，视网膜接收到的是弥散的光斑——这就是“看不清”时的画面。";
+        }
+
+        /* ================= water lens mini-sim ================= */
+        var W = { water: 64 };
+        var wSlider = $("wSlider"), wVal = $("wVal");
+        var wRays = $("wRays"), wLens = $("wLens"), wBlur = $("wBlur"), wImgPt = $("wImgPt");
+        var wVerdict = $("wVerdict"), wHint = $("wHint"), wF = $("wF"), wFLab = $("wFLab");
+        var WU = 150, WV = 150, WS = 370 / 150;   // object/screen distances (mm), px per mm
+        var WX0 = 120, WXL = 490, WXS = 860, WY = 170, WH0 = 84 / WS;
+
+        wSlider.addEventListener("input", function () {
+          W.water = parseInt(wSlider.value, 10);
+          wVal.textContent = W.water + "%";
+        });
+
+        function renderWater() {
+          var f = 120 - 0.7 * W.water;   // 0% -> 120mm, 100% -> 50mm; sharp at 75mm (64%)
+          var slopes = [0, -WH0 / WU, -WH0 / (2 * WU)];
+          var pts = slopes.map(function (th0) {
+            var yL = WH0 + th0 * WU;
+            var th1 = th0 - yL / f;
+            return { yL: yL, th1: th1 };
+          });
+          /* image point = intersection of the parallel ray and the chief ray */
+          var dthW = pts[0].th1 - pts[1].th1;
+          var xImg = Math.abs(dthW) < 1e-12 ? Infinity : (pts[1].yL - pts[0].yL) / dthW;
+          var yImg = isFinite(xImg) ? pts[0].yL + pts[0].th1 * xImg : 0;
+
+          /* lens shape: thicker with more water */
+          var thick = 4 + W.water * 0.16, HH = 84;
+          wLens.setAttribute("d",
+            "M " + WXL + " " + (WY - HH) +
+            " Q " + (WXL + thick) + " " + WY + " " + WXL + " " + (WY + HH) +
+            " Q " + (WXL - thick) + " " + WY + " " + WXL + " " + (WY - HH) + " Z");
+
+          var xi = WXL + Math.min(isFinite(xImg) ? xImg : 300, 300) * WS;
+          var yi = WY - yImg * WS;
+          var html = "", yAtScreen = [];
+          pts.forEach(function (p) {
+            var yLPx = WY - p.yL * WS;
+            var yS = p.yL + p.th1 * WV;
+            var ySPx = WY - yS * WS;
+            yAtScreen.push(ySPx);
+            html += '<path class="ray" d="M ' + WX0 + " " + (WY - 84) + " L " + WXL + " " + yLPx.toFixed(1);
+            if (isFinite(xImg) && xImg <= WV) {
+              html += " L " + xi.toFixed(1) + " " + yi.toFixed(1) + '"/>';
+              html += arrowAt(WX0, WY - 84, WXL, yLPx, 0.5, 0.95);
+              html += arrowAt(WXL, yLPx, xi, yi, 0.42, 0.95);
+              html += '<path class="ray-dash" d="M ' + xi.toFixed(1) + " " + yi.toFixed(1) + " L " + WXS + " " + ySPx.toFixed(1) + '"/>';
+            } else {
+              html += " L " + WXS + " " + ySPx.toFixed(1) + '"/>';
+              html += arrowAt(WX0, WY - 84, WXL, yLPx, 0.5, 0.95);
+              html += arrowAt(WXL, yLPx, WXS, ySPx, 0.42, 0.95);
+              if (isFinite(xImg)) {
+                html += '<path class="ray-dash" d="M ' + WXS + " " + ySPx.toFixed(1) + " L " + xi.toFixed(1) + " " + yi.toFixed(1) + '"/>';
+              }
+            }
+          });
+          wRays.innerHTML = html;
+
+          var yMin = Math.min.apply(null, yAtScreen), yMax = Math.max.apply(null, yAtScreen);
+          var spread = yMax - yMin, yMid = (yMin + yMax) / 2;
+          wBlur.setAttribute("cx", WXS - 2);
+          wBlur.setAttribute("cy", yMid.toFixed(1));
+          wBlur.setAttribute("ry", Math.max(2.5, spread / 2));
+          wBlur.style.display = spread > 4 ? "" : "none";
+          if (spread > 6 && isFinite(xImg) && Math.abs(xImg - WV) > 3) {
+            wImgPt.style.display = "";
+            wImgPt.setAttribute("cx", xi.toFixed(1));
+            wImgPt.setAttribute("cy", yi.toFixed(1));
+          } else {
+            wImgPt.style.display = "none";
+          }
+
+          var sharp = spread <= 6;
+          wF.innerHTML = "<b>" + fmt1(f) + " mm</b>";
+          wFLab.textContent = "水透镜焦距约 " + fmt1(f) + " mm";
+          if (sharp) {
+            wVerdict.className = "water-verdict ok";
+            wVerdict.textContent = "像清晰：水量正好，光屏上的像最清楚";
+            wHint.textContent = "这时水透镜的焦距刚好让像成在光屏上。眼睛看东西时，睫状肌就是这样把晶状体调到“正好”的厚薄。";
+          } else if (isFinite(xImg) && xImg < WV) {
+            wVerdict.className = "water-verdict bad";
+            wVerdict.textContent = "像模糊：水太多，焦距太短，像成在光屏前面";
+            wHint.textContent = "抽掉一点水，让透镜变瘪、焦距变长，像就会往后移到光屏上。";
+          } else {
+            wVerdict.className = "water-verdict bad";
+            wVerdict.textContent = "像模糊：水太少，焦距太长，像成在光屏后面";
+            wHint.textContent = "再注点水，让透镜变鼓、焦距变短，像就会往前移到光屏上。";
+          }
+        }
+
+        /* ---- offline copy ---- */
+        $("offlineBtn").addEventListener("click", function () {
+          var html = "<!doctype html>\n" + document.documentElement.outerHTML;
+          var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "近视与远视的成因及矫正模拟（离线版）.html";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        });
+
+        /* ---- main loop ---- */
+        function loop() {
+          if (state.demo) {
+            state.demoT += 1 / 60;
+            var ph = (Math.sin(state.demoT * 0.55) + 1) / 2;   // 0..1, far -> near -> far
+            state.u_cm = tToU(ph);
+            uSlider.value = Math.round(ph * 1000);
+            syncChips();
+          }
+          render();
+          renderWater();
+          requestAnimationFrame(loop);
+        }
+
+        /* ---- init ---- */
+        setEye("myopia");
+        syncChips();
+        loop();
+      })();
+    </script>
+  </body>
+</html>
