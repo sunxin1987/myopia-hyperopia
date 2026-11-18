@@ -897,6 +897,18 @@
             r.y0 = y0;
             return r;
           });
+          /* Drawn vertex heights at the glasses (yGd): with convex glasses the
+             rays between the glasses and the lens converge toward the axis
+             (textbook fig. 4-5-6(b)). The true 12 mm gap makes this
+             convergence sub-pixel (about 2 px), so the drawn heights are
+             stretched 8% around each ray's height at the object plane -- the
+             optics (image point, verdict, fitted power) are untouched, and
+             for a far object the stretch is zero (yG equals y0), so the
+             parallel bundle stays parallel. Clamped to the glasses aperture. */
+          var ex = (isFinite(fG) && fG > 0) ? 1.08 : 1;
+          rays.forEach(function (r) {
+            r.yGd = Math.max(-14.5, Math.min(14.5, r.y0 + (r.yG - r.y0) * ex));
+          });
           /* image point = intersection of the top and centre rays after the eye lens */
           var dth = rays[0].th2 - rays[1].th2;
           var xImg, yImg;
@@ -987,7 +999,7 @@
           var html = "", yAtRetina = [];
           rays.forEach(function (r) {
             var y0Px = CY - r.y0 * S;
-            var yGPx = CY - r.yG * S, yEPx = CY - r.yE * S;
+            var yGPx = CY - r.yGd * S, yEPx = CY - r.yE * S;
             var yR = r.yE + r.th2 * L;
             var yRPx = CY - yR * S;
             yAtRetina.push(yRPx);
