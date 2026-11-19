@@ -976,10 +976,16 @@
             glassesG.style.display = "";
             var gh = 92;
             if (state.gDeg < 0) {
+              /* biconcave lens: thin in the middle, thick at the top/bottom ends.
+                 (The old code drew two outward-bowing arcs, i.e. a biconvex
+                 leaf, for both signs -- wrong for myopia.) Ends half-width 9,
+                 centre half-width 2.5: quadratic control = 2*centre - ends. */
               glassesPath.setAttribute("d",
-                "M " + gx + " " + (CY - gh) +
-                " Q " + (gx + 10) + " " + CY + " " + gx + " " + (CY + gh) +
-                " Q " + (gx - 10) + " " + CY + " " + gx + " " + (CY - gh) + " Z");
+                "M " + (gx - 9) + " " + (CY - gh) +
+                " L " + (gx + 9) + " " + (CY - gh) +
+                " Q " + (gx - 4) + " " + CY + " " + (gx + 9) + " " + (CY + gh) +
+                " L " + (gx - 9) + " " + (CY + gh) +
+                " Q " + (gx + 4) + " " + CY + " " + (gx - 9) + " " + (CY - gh) + " Z");
             } else {
               glassesPath.setAttribute("d",
                 "M " + gx + " " + (CY - gh) +
